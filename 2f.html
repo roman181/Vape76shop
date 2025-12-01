@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Link Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Farbschema & Variablen */
+            --glass-bg: rgba(20, 20, 40, 0.6);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #b0b0b0;
+            --accent-color: #00d2ff; 
+            
+            /* Kategorie Farben */
+            --accent-insta: linear-gradient(45deg, #f09433, #bc1888);
+            --accent-tiktok: #00f2ea;
+            --accent-ai: #7000ff;
+            --accent-apk: #00d26a;
+            --accent-iptv: #ff4757;
+            --accent-security: #ff9f43;
+            --accent-new: #ffffff; /* Helles Weiß für Neue Links */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* VIDEO HINTERGRUND */
+        .video-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2; overflow: hidden; background-color: #0f0c29;
+        }
+        .video-background video {
+            position: absolute; top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            transform: translate(-50%, -50%); object-fit: cover;
+        }
+        .video-background .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 5, 30, 0.75); z-index: -1;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent; color: var(--text-main);
+            min-height: 100vh; display: flex; overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(15px); border-right: var(--glass-border);
+            padding: 30px 20px; display: flex; flex-direction: column; z-index: 10;
+            overflow-y: auto;
+        }
+        .brand {
+            font-size: 1.5rem; font-weight: 800; margin-bottom: 30px;
+            display: flex; align-items: center; gap: 10px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+        
+        .nav-group-title {
+            font-size: 0.7rem; color: #888; margin-top: 20px; margin-bottom: 8px;
+            padding-left: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .nav-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 12px 15px; text-align: left; cursor: pointer;
+            font-size: 0.95rem; border-radius: 12px; transition: all 0.3s;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 2px;
+            width: 100%;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(0, 210, 255, 0.15); color: #fff;
+        }
+        .nav-btn.active { border-left: 3px solid var(--accent-color); font-weight: 600; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1; padding: 40px; overflow-y: auto; position: relative;
+            scroll-behavior: smooth;
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+        }
+        .clock {
+            font-variant-numeric: tabular-nums; font-weight: 300; font-size: 1.2rem;
+            background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .search-box input {
+            width: 350px; padding: 14px 25px; border-radius: 50px;
+            border: var(--glass-border); background: rgba(0,0,0,0.3);
+            color: white; outline: none; transition: 0.3s; backdrop-filter: blur(5px);
+        }
+        .search-box input:focus {
+            background: rgba(0,0,0,0.5); border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+
+        /* GRID & CARDS */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px; padding-bottom: 50px;
+        }
+        .card {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: var(--glass-border); border-radius: 20px; padding: 25px;
+            transition: 0.3s; position: relative; overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .card:hover {
+            transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            background: rgba(30, 30, 50, 0.7);
+        }
+        .card-header {
+            display: flex; justify-content: space-between; margin-bottom: 20px;
+            padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .card-title { font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 12px; }
+        
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; }
+        .dot-insta { background: var(--accent-insta); color: #dc2743; }
+        .dot-tiktok { background: var(--accent-tiktok); color: #00f2ea; }
+        .dot-ai { background: var(--accent-ai); color: #7000ff; }
+        .dot-apk { background: var(--accent-apk); color: #00d26a; }
+        .dot-iptv { background: var(--accent-iptv); color: #ff4757; }
+        .dot-sec { background: var(--accent-security); color: #ff9f43; }
+        .dot-new { background: var(--accent-new); color: #ffffff; }
+
+        /* LINKS */
+        .link-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .btn-launch {
+            flex: 1; padding: 12px 15px; border-radius: 10px;
+            background: rgba(255,255,255,0.07); color: white; text-decoration: none;
+            font-size: 0.9rem; font-weight: 500; transition: 0.2s;
+            display: flex; align-items: center; justify-content: flex-start; gap: 10px;
+        }
+        
+        .btn-launch img.app-icon {
+            width: 24px; height: 24px; border-radius: 6px; object-fit: cover;
+        }
+
+        .btn-launch:hover {
+            background: var(--accent-color); color: #000; font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); transform: translateY(-2px);
+        }
+        /* Kategorie Hover Farben */
+        .category-security .btn-launch:hover { background: var(--accent-security); box-shadow: 0 0 15px var(--accent-security); }
+        .category-new .btn-launch:hover { background: var(--accent-new); color: #000; box-shadow: 0 0 15px white; }
+
+        .btn-copy {
+            width: 45px; height: 45px; border: none; background: rgba(255,255,255,0.05);
+            color: var(--text-muted); border-radius: 10px; cursor: pointer;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-copy:hover { background: rgba(255,255,255,0.2); color: white; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: rgba(0, 210, 80, 0.9); color: white;
+            padding: 15px 25px; border-radius: 50px; font-weight: 600;
+            transform: translateY(100px); transition: 0.4s; z-index: 100;
+        }
+        .toast.show { transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 15px; gap: 10px; }
+            .brand { display: none; } 
+            .nav-group-title { display: none; } 
+            .header { flex-direction: column-reverse; gap: 20px; align-items: flex-start; }
+            .search-box input { width: 100%; }
+            .clock { position: absolute; top: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- VIDEO HINTERGRUND -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://www.shutterstock.com/shutterstock/videos/1102705815/preview/stock-footage-abstract-neon-blue-and-purple-speed-line-background-flow-of-light-motion-graphic-design-modern.webm" type="video/webm">
+        </video>
+        <div class="overlay"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand"><span>⚡</span> LAUNCHER</div>
+        
+        <div class="nav-group-title">MAIN</div>
+        <button class="nav-btn active" onclick="filterCategory('all')">🏠 Dashboard</button>
+        
+        <!-- NEUES MENÜ -->
+        <button class="nav-btn" onclick="filterCategory('new')">✨ Neue Tools</button>
+
+        <div class="nav-group-title">SOCIAL</div>
+        <button class="nav-btn" onclick="filterCategory('instagram')">📷 Instagram</button>
+        <button class="nav-btn" onclick="filterCategory('tiktok')">🎵 TikTok & Tools</button>
+        
+        <div class="nav-group-title">APPS & AI</div>
+        <button class="nav-btn" onclick="filterCategory('ai')">🤖 AI Tools</button>
+        <button class="nav-btn" onclick="filterCategory('apk')">📲 APK Mods</button>
+        <button class="nav-btn" onclick="filterCategory('iptv')">📺 IPTV</button>
+        
+        <div class="nav-group-title">SECURITY</div>
+        <button class="nav-btn" onclick="filterCategory('security')">🔒 Carding & Sec</button>
+    </aside>
+
+    <!-- HAUPTINHALT -->
+    <section class="main-content">
+        <header class="header">
+            <div class="greeting">
+                <h2 id="greeting-text">Willkommen</h2>
+                <p>Wähle dein Tool für heute.</p>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Suche (z.B. Canva, AI, Premium)..." onkeyup="liveSearch()">
+            </div>
+            <div class="clock" id="clock">--:--</div>
+        </header>
+
+        <div class="grid-container" id="cardGrid">
+
+            <!-- !!! KATEGORIE: NEUE APKS !!! -->
+            <div class="card category-new">
+                <div class="card-header"><div class="card-title"><span class="dot dot-new"></span> 2026 Premium Tools</div></div>
+                
+                <!-- Perplexity -->
+                <div class="link-row">
+                    <a href="https://linkvertise.com/1380562/2dAQwYVMbzT4?o=sharing" target="_blank" class="btn-launch">
+                        <img src="https://cdn.mos.cms.futurecdn.net/gu8YwNpThWDRkBpDRLh2k7-1024-80.jpg.webp" class="app-icon"> Perplexity AI
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://linkvertise.com/1380562/2dAQwYVMbzT4?o=sharing')">📋</button>
+                </div>
+
+                <!-- Canva -->
+                <div class="link-row">
+                    <a href="https://direct-link.net/1380562/gKxjfJ8QL4j1" target="_blank" class="btn-launch">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiZS8U4BG8_DSJrL28LHone4DJd6G7hYfONOowIiXHpzUzgqzEhJrTLil_&s=10" class="app-icon"> Canva Premium
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://direct-link.net/1380562/gKxjfJ8QL4j1')">📋</button>
+                </div>
+
+                <!-- AI Video -->
+                <div class="link-row">
+                    <a href="https://link-target.net/1380562/jHd8T1HKJizY" target="_blank" class="btn-launch">
+                        <img src="https://cdn.gowinston.ai/wp-content/uploads/2024/04/AI-VIDEO.jpg" class="app-icon"> AI Video
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-target.net/1380562/jHd8T1HKJizY')">📋</button>
+                </div>
+
+                <!-- AI Video Gen -->
+                <div class="link-row">
+                    <a href="https://link-target.net/1380562/pSQv4LnbnFR2" target="_blank" class="btn-launch">
+                        <img src="https://plugins-media.makeupar.com/smb/blog/post/2025-01-13/4d1fd012-de7b-44fa-ac8b-ed1ab40cdcab.jpg" class="app-icon"> AI Video Gen
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-target.net/1380562/pSQv4LnbnFR2')">📋</button>
+                </div>
+
+                <!-- Fmkidz -->
+                <div class="link-row">
+                    <a href="https://direct-link.net/1380562/ed1Cug7YRjFO" target="_blank" class="btn-launch">
+                        <img src="https://www.apkmirror.com/wp-content/themes/APKMirror/ap_resize/ap_resize.php?src=https%3A%2F%2Fdownloadr2.apkmirror.com%2Fwp-content%2Fuploads%2F2024%2F02%2F80%2F65d3164606772_org.findmykids.app.png&w=384&h=384&q=100" class="app-icon"> Fmkidz
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://direct-link.net/1380562/ed1Cug7YRjFO')">📋</button>
+                </div>
+
+                <!-- Gamini -->
+                <div class="link-row">
+                    <a href="https://link-hub.net/1380562/Y50I997OIeKX" target="_blank" class="btn-launch">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6AkFTz-OXKZwN85biiJ8QdarEkMd8t3uB9ZRz83_fXQst7XsNjrtcfQVg&s=10" class="app-icon"> Gamini AI
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-hub.net/1380562/Y50I997OIeKX')">📋</button>
+                </div>
+
+                <!-- Grok -->
+                <div class="link-row">
+                    <a href="https://link-hub.net/1380562/ac4FbxygOwaW" target="_blank" class="btn-launch">
+                        <img src="https://www.golem.de/2502/193676-496038-496037_rc.jpg" class="app-icon"> Grok AI
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-hub.net/1380562/ac4FbxygOwaW')">📋</button>
+                </div>
+
+                <!-- Heygen -->
+                <div class="link-row">
+                    <a href="https://direct-link.net/1380562/LwxwceYCVQte" target="_blank" class="btn-launch">
+                         Heygen Avatar AI
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://direct-link.net/1380562/LwxwceYCVQte')">📋</button>
+                </div>
+
+                <!-- Intro Maker -->
+                <div class="link-row">
+                    <a href="https://link-hub.net/1380562/qmRNXQIq4F2h" target="_blank" class="btn-launch">
+                        <img src="https://play-lh.googleusercontent.com/PMGfMep6hPIjR69XJ_Op1Lwq3Yhjb-IH3zdLt3nttwqhmLAtBn-po5CuIyXqmA_2iOIN" class="app-icon"> Intro Maker
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-hub.net/1380562/qmRNXQIq4F2h')">📋</button>
+                </div>
+
+                <!-- Lazymedia -->
+                <div class="link-row">
+                    <a href="https://link-target.net/1380562/ePE9j3Ee9fJc" target="_blank" class="btn-launch">
+                        <img src="https://lazycatsoftware.com/images/lazymediadeluxe_pro.png" class="app-icon"> LazyMedia Deluxe
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-target.net/1380562/ePE9j3Ee9fJc')">📋</button>
+                </div>
+
+                <!-- YouTube Lite -->
+                <div class="link-row">
+                    <a href="https://link-target.net/1380562/CDoLePESNjLU" target="_blank" class="btn-launch">
+                        <img src="https://youtubelite.net/youtube_lite.webp" class="app-icon"> YouTube Lite
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-target.net/1380562/CDoLePESNjLU')">📋</button>
+                </div>
+
+                <!-- YouTube Premium -->
+                <div class="link-row">
+                    <a href="https://link-center.net/1380562/OU3JjjK2jF42" target="_blank" class="btn-launch">
+                        <img src="https://www.gstatic.com/youtube/img/promos/growth/YTP_logo_social_1200x630.png?days_since_epoch=20420" class="app-icon"> YouTube Premium
+                    </a>
+                    <button class="btn-copy" onclick="copyLink(this, 'https://link-center.net/1380562/OU3JjjK2jF42')">📋</button>
+                </div>
+
+            </div>
+
+            <!-- INSTAGRAM -->
+            <div class="card category-instagram">
+                <div class="card-header"><div class="card-title"><span class="dot dot-insta"></span> Free Instagram</div></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-instagram-followers" target="_blank" class="btn-launch">Followers</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-instagram-followers')">📋</button></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-instagram-likes" target="_blank" class="btn-launch">Likes</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-instagram-likes')">📋</button></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-instagram-views" target="_blank" class="btn-launch">Views</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-instagram-views')">📋</button></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-instagram-saves" target="_blank" class="btn-launch">Saves</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-instagram-saves')">📋</button></div>
+            </div>
+
+            <!-- TIKTOK -->
+            <div class="card category-tiktok">
+                <div class="card-header"><div class="card-title"><span class="dot dot-tiktok"></span> Free TikTok</div></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-tiktok-likes" target="_blank" class="btn-launch">Likes</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-tiktok-likes')">📋</button></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-tiktok-views" target="_blank" class="btn-launch">Views</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-tiktok-views')">📋</button></div>
+                <div class="link-row"><a href="https://leofame.com/de/free-tiktok-followers" target="_blank" class="btn-launch">Followers</a><button class="btn-copy" onclick="copyLink(this, 'https://leofame.com/de/free-tiktok-followers')">📋</button></div>
+            </div>
+
+            <!-- AI -->
+            <div class="card category-ai">
+                <div class="card-header"><div class="card-title"><span class="dot dot-ai"></span> AI Tools</div></div>
+                <div class="link-row"><a href="https://share.pix.video/referral/3TK0JE1L" target="_blank" class="btn-launch">PICVERSE</a><button class="btn-copy" onclick="copyLink(this, 'https://share.pix.video/referral/3TK0JE1L')">📋</button></div>
+                <div class="link-row"><a href="https://play.google.com/store/apps/details?id=com.feraset.livensa&hl=en_US" target="_blank" class="btn-launch">LIVENSA</a><button class="btn-copy" onclick="copyLink(this, 'https://play.google.com/store/apps/details?id=com.feraset.livensa&hl=en_US')">📋</button></div>
+                <div class="link-row"><a href="https://www.krea.ai/video" target="_blank" class="btn-launch">Krea AI</a><button class="btn-copy" onclick="copyLink(this, 'https://www.krea.ai/video')">📋</button></div>
+                <div class="link-row"><a href="https://monica.im/de/ai-models/veo" target="_blank" class="btn-launch">Monica Veo</a><button class="btn-copy" onclick="copyLink(this, 'https://monica.im/de/ai-models/veo')">📋</button></div>
+            </div>
+
+            <!-- APK -->
+            <div class="card category-apk">
+                <div class="card-header"><div class="card-title"><span class="dot dot-apk"></span> APK Mods</div></div>
+                <div class="link-row"><a href="https://apk-mod.net/en/" target="_blank" class="btn-launch">Apk-mod.net</a><button class="btn-copy" onclick="copyLink(this, 'https://apk-mod.net/en/')">📋</button></div>
+                <div class="link-row"><a href="https://share.google/fhyw7MQ7mC1JcNydk" target="_blank" class="btn-launch">APKMODY</a><button class="btn-copy" onclick="copyLink(this, 'https://share.google/fhyw7MQ7mC1JcNydk')">📋</button></div>
+                <div class="link-row"><a href="https://share.google/IRHXCqOzcs49ZpQG3" target="_blank" class="btn-launch">LITEAPKS</a><button class="btn-copy" onclick="copyLink(this, 'https://share.google/IRHXCqOzcs49ZpQG3')">📋</button></div>
+            </div>
+
+            <!-- IPTV -->
+            <div class="card category-iptv">
+                <div class="card-header"><div class="card-title"><span class="dot dot-iptv"></span> IPTV / Kodi</div></div>
+                <div class="link-row"><a href="https://github.com/roman181/Kodi2026.git" target="_blank" class="btn-launch">MY Kodi 2026</a><button class="btn-copy" onclick="copyLink(this, 'https://github.com/roman181/Kodi2026.git')">📋</button></div>
+                <div class="link-row"><a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/4106d4241c3c8443ebd89bc0ba2242dd/b54f0442-2bef-4825-bbdd-ca81af2a750f/index.html?utm_source=perplexity" target="_blank" class="btn-launch">IPTV Portal</a><button class="btn-copy" onclick="copyLink(this, 'https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/4106d4241c3c8443ebd89bc0ba2242dd/b54f0442-2bef-4825-bbdd-ca81af2a750f/index.html?utm_source=perplexity')">📋</button></div>
+            </div>
+
+            <!-- CARDING & SECURITY -->
+            <div class="card category-security">
+                <div class="card-header"><div class="card-title"><span class="dot dot-sec"></span> Carding & Security</div></div>
+                <div class="link-row"><a href="https://www.fakexy.com/" target="_blank" class="btn-launch">Fake Identität</a><button class="btn-copy" onclick="copyLink(this, 'https://www.fakexy.com/')">📋</button></div>
+                <div class="link-row"><a href="https://share.google/XX700qXOTOUjyyu7x" target="_blank" class="btn-launch">Test-CC Nummern</a><button class="btn-copy" onclick="copyLink(this, 'https://share.google/XX700qXOTOUjyyu7x')">📋</button></div>
+                <div class="link-row"><a href="https://share.google/4oPfNeWOJ5FW8DKOD" target="_blank" class="btn-launch">CC Generator</a><button class="btn-copy" onclick="copyLink(this, 'https://share.google/4oPfNeWOJ5FW8DKOD')">📋</button></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- TOAST MESSAGE -->
+    <div id="toast" class="toast">Link kopiert! ✅</div>
+
+    <!-- FUNKTIONALITÄT -->
+    <script>
+        // 1. UHRZEIT
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. LINK KOPIEREN
+        function copyLink(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        }
+
+        // 3. KATEGORIEN FILTERN
+        function filterCategory(category) {
+            const cards = document.querySelectorAll('.card');
+            const buttons = document.querySelectorAll('.nav-btn');
+
+            // Active Button Status
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            cards.forEach(card => {
+                if (category === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    if (card.classList.contains('category-' + category)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // 4. SUCHE
+        function liveSearch() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                let text = card.innerText.toLowerCase();
+                if (text.includes(input)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
